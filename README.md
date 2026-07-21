@@ -26,6 +26,10 @@ This project is built to show practical data engineering skills around a real in
 ```text
 app/
   streamlit_app.py
+  dashboard/
+    data.py
+    formatting.py
+    views.py
 data/
   sample_sessions.csv
   sample_spots.csv
@@ -112,6 +116,26 @@ The local pipeline has been run against PostgreSQL and Open-Meteo.
 Validation command:
 
 ```bash
+cd warehouse
+dbt build --profiles-dir .
+```
+
+## Verified Phase 3 Dashboard
+
+The dashboard has been refactored into smaller modules and now reads from the dbt marts.
+
+- Added overview metrics for sessions, average rating, best spot, and modeled surfable days
+- Added spot performance charts from `analytics.mart_spot_performance`
+- Added session timeline analysis by spot and duration
+- Added forecast condition analysis from `analytics.fct_daily_spot_conditions`
+- Added forecast-to-session quality analysis from `analytics.mart_forecast_vs_session_quality`
+- Added pipeline health metrics from recorded ingestion runs
+- Recreated the local virtual environment with stable dependency pins
+
+Validation commands:
+
+```bash
+python -m compileall app pipelines
 cd warehouse
 dbt build --profiles-dir .
 ```
