@@ -4,22 +4,22 @@ models:
   - name: stg_spots
     columns:
       - name: spot_id
-        tests:
+        data_tests:
           - not_null
           - unique
       - name: spot_slug
-        tests:
+        data_tests:
           - not_null
           - unique
 
   - name: stg_sessions
     columns:
       - name: session_id
-        tests:
+        data_tests:
           - not_null
           - unique
       - name: rating
-        tests:
+        data_tests:
           - not_null
           - accepted_values:
               values: [1, 2, 3, 4, 5]
@@ -28,20 +28,20 @@ models:
   - name: fct_daily_spot_conditions
     columns:
       - name: daily_condition_id
-        tests:
+        data_tests:
           - not_null
           - unique
 
   - name: fct_surf_sessions
     columns:
       - name: session_id
-        tests:
+        data_tests:
           - not_null
           - unique
 
   - name: mart_spot_performance
     columns:
       - name: spot_id
-        tests:
+        data_tests:
           - not_null
           - unique

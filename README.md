@@ -95,3 +95,23 @@ Built an end-to-end surf analytics warehouse using PostgreSQL, dbt, Python, and 
 - dbt staging, fact, and mart models
 - Streamlit dashboard for sessions, conditions, spot performance, and pipeline health
 
+## Verified Phase 2 Run
+
+The local pipeline has been run against PostgreSQL and Open-Meteo.
+
+- Seeded 3 surf spots
+- Seeded 4 sample surf sessions
+- Loaded 504 marine forecast rows
+- Loaded 504 weather forecast rows
+- Built 8 dbt models
+- Passed 14 dbt data tests
+- Produced 21 daily spot condition rows
+- Produced 3 spot performance rows
+- Produced 4 forecast-to-session quality rows
+
+Validation command:
+
+```bash
+cd warehouse
+dbt build --profiles-dir .
+```
