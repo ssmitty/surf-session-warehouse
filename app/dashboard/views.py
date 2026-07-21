@@ -3,8 +3,6 @@ from __future__ import annotations
 from datetime import date
 
 import pandas as pd
-import plotly.express as px
-from plotly.graph_objects import Figure
 import streamlit as st
 
 from app.dashboard.data import (
@@ -42,10 +40,10 @@ def render_overview() -> None:
     left, right = st.columns([1, 1])
     with left:
         st.subheader("Spot Performance")
-        st.plotly_chart(_spot_rating_chart(performance), use_container_width=True)
+        _render_spot_rating_chart(performance)
     with right:
         st.subheader("Session Timeline")
-        st.plotly_chart(_session_timeline_chart(sessions), use_container_width=True)
+        _render_session_timeline_chart(sessions)
 
     st.subheader("Warehouse Mart Preview")
     st.dataframe(performance, use_container_width=True, hide_index=True)
@@ -89,7 +87,7 @@ def render_forecast_analysis() -> None:
     columns[1].metric("Avg Wave Height (m)", avg_wave_height)
     columns[2].metric("Avg Wind Speed (km/h)", avg_wind_speed)
 
-    st.plotly_chart(_wave_forecast_chart(filtered), use_container_width=True)
+    _render_wave_forecast_chart(filtered)
 
     st.subheader("Modeled Surfable Days")
     surfable = filtered[filtered["modeled_surfable_day"] == 1]
@@ -124,7 +122,7 @@ def render_quality_analysis() -> None:
         if chart_data.empty:
             st.info("No sessions have matched forecast metrics to chart yet.")
         else:
-            st.plotly_chart(_quality_scatter(chart_data), use_container_width=True)
+            _render_quality_scatter(chart_data)
     with right:
         st.dataframe(quality, use_container_width=True, hide_index=True)
 
@@ -217,62 +215,54 @@ def _chartable_quality_rows(quality: pd.DataFrame) -> pd.DataFrame:
     return chart_data
 
 
-def _spot_rating_chart(performance: pd.DataFrame) -> Figure:
-    return px.bar(
-        performance,
-        x="spot_name",
-        y="avg_session_rating",
-        color="region",
-        labels={
-            "spot_name": "Spot",
-            "avg_session_rating": "Avg Rating",
-            "region": "Region",
-        },
-    )
+def _render_spot_rating_chart(performance: pd.DataFrame) -> None:
+    if performance.empty:
+        st.info("No spot performance rows are available yet.")
+        return
+    chart_data = performance.set_index("spot_name")["avg_session_rating"]
+    st.bar_chart(chart_data, x_label="Spot", y_label="Average Rating")
 
 
-def _session_timeline_chart(sessions: pd.DataFrame) -> Figure:
-    return px.scatter(
-        sessions.sort_values("session_date"),
+def _render_session_timeline_chart(sessions: pd.DataFrame) -> None:
+    if sessions.empty:
+        st.info("No sessions are available yet.")
+        return
+    chart_data = sessions.copy()
+    chart_data["session_date"] = pd.to_datetime(chart_data["session_date"])
+    st.scatter_chart(
+        chart_data,
         x="session_date",
         y="rating",
         color="spot_name",
         size="duration_minutes",
-        labels={
-            "session_date": "Session Date",
-            "rating": "Rating",
-            "spot_name": "Spot",
-            "duration_minutes": "Duration",
-        },
+        x_label="Session Date",
+        y_label="Rating",
     )
 
 
-def _wave_forecast_chart(conditions: pd.DataFrame) -> Figure:
-    return px.line(
-        conditions.sort_values("forecast_date"),
+def _render_wave_forecast_chart(conditions: pd.DataFrame) -> None:
+    if conditions.empty:
+        st.info("No forecast condition rows are available yet.")
+        return
+    chart_data = conditions.copy()
+    chart_data["forecast_date"] = pd.to_datetime(chart_data["forecast_date"])
+    st.line_chart(
+        chart_data,
         x="forecast_date",
         y="avg_wave_height_m",
         color="spot_name",
-        labels={
-            "forecast_date": "Forecast Date",
-            "avg_wave_height_m": "Avg Wave Height (m)",
-            "spot_name": "Spot",
-        },
+        x_label="Forecast Date",
+        y_label="Average Wave Height (m)",
     )
 
 
-def _quality_scatter(quality: pd.DataFrame) -> Figure:
-    return px.scatter(
+def _render_quality_scatter(quality: pd.DataFrame) -> None:
+    st.scatter_chart(
         quality,
         x="avg_wave_height_m",
         y="rating",
         color="spot_name",
         size="avg_wave_period_s",
-        hover_data=["session_date", "actual_wave_quality", "wind_direction"],
-        labels={
-            "avg_wave_height_m": "Avg Wave Height (m)",
-            "rating": "Session Rating",
-            "spot_name": "Spot",
-            "avg_wave_period_s": "Avg Wave Period",
-        },
+        x_label="Average Wave Height (m)",
+        y_label="Session Rating",
     )
