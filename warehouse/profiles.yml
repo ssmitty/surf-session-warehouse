@@ -1,0 +1,13 @@
+surf_session_warehouse:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('POSTGRES_HOST', 'localhost') }}"
+      user: "{{ env_var('POSTGRES_USER', 'surf') }}"
+      password: "{{ env_var('POSTGRES_PASSWORD', 'surf') }}"
+      port: "{{ env_var('POSTGRES_PORT', 5432) | int }}"
+      dbname: "{{ env_var('POSTGRES_DB', 'surf_warehouse') }}"
+      schema: analytics
+      threads: 4
+

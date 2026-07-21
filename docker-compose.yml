@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: surf-session-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: surf_warehouse
+      POSTGRES_USER: surf
+      POSTGRES_PASSWORD: surf
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U surf -d surf_warehouse"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
+

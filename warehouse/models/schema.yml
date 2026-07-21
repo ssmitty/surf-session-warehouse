@@ -1,0 +1,47 @@
+version: 2
+
+models:
+  - name: stg_spots
+    columns:
+      - name: spot_id
+        tests:
+          - not_null
+          - unique
+      - name: spot_slug
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_sessions
+    columns:
+      - name: session_id
+        tests:
+          - not_null
+          - unique
+      - name: rating
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4, 5]
+              quote: false
+
+  - name: fct_daily_spot_conditions
+    columns:
+      - name: daily_condition_id
+        tests:
+          - not_null
+          - unique
+
+  - name: fct_surf_sessions
+    columns:
+      - name: session_id
+        tests:
+          - not_null
+          - unique
+
+  - name: mart_spot_performance
+    columns:
+      - name: spot_id
+        tests:
+          - not_null
+          - unique

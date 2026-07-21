@@ -1,0 +1,24 @@
+name: surf_session_warehouse
+version: "1.0.0"
+config-version: 2
+
+profile: surf_session_warehouse
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+analysis-paths: ["analyses"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - target
+  - dbt_packages
+
+models:
+  surf_session_warehouse:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table
+

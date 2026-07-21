@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: app
+    schema: public
+    tables:
+      - name: surf_spots
+      - name: surf_sessions
+      - name: raw_marine_forecasts
+      - name: raw_weather_forecasts
+      - name: pipeline_runs
+
