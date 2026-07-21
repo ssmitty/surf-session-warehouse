@@ -23,6 +23,10 @@ def database_url() -> str:
     return f"postgresql://{user}:{password}@{host}:{port}/{db}"
 
 
+def sqlalchemy_database_url() -> str:
+    return database_url().replace("postgresql://", "postgresql+psycopg://", 1)
+
+
 def connect() -> psycopg.Connection:
     return psycopg.connect(database_url())
 
@@ -33,4 +37,3 @@ def ensure_schema() -> None:
         with conn.cursor() as cur:
             cur.execute(init_sql.read_text())
         conn.commit()
-

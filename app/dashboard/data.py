@@ -5,14 +5,14 @@ from collections.abc import Sequence
 import pandas as pd
 from sqlalchemy import create_engine
 
-from pipelines.db import connect, database_url
+from pipelines.db import connect, sqlalchemy_database_url
 
 QueryParams = Sequence[object] | None
 
 
 def read_query(sql: str, params: QueryParams = None) -> pd.DataFrame:
     """Read a SQL query into a dataframe using the project warehouse."""
-    engine = create_engine(database_url())
+    engine = create_engine(sqlalchemy_database_url())
     with engine.connect() as conn:
         return pd.read_sql(sql, conn, params=params)
 
