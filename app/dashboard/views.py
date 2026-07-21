@@ -120,7 +120,11 @@ def render_quality_analysis() -> None:
 
     left, right = st.columns([1, 1])
     with left:
-        st.plotly_chart(_quality_scatter(quality), use_container_width=True)
+        chart_data = _chartable_quality_rows(quality)
+        if chart_data.empty:
+            st.info("No sessions have matched forecast metrics to chart yet.")
+        else:
+            st.plotly_chart(_quality_scatter(chart_data), use_container_width=True)
     with right:
         st.dataframe(quality, use_container_width=True, hide_index=True)
 
@@ -196,6 +200,21 @@ def _filter_spots(data: pd.DataFrame, selected_spots: list[str]) -> pd.DataFrame
     if not selected_spots:
         return data
     return data[data["spot_name"].isin(selected_spots)]
+
+
+def _chartable_quality_rows(quality: pd.DataFrame) -> pd.DataFrame:
+    chart_data = quality.copy()
+    numeric_columns = [
+        "avg_wave_height_m",
+        "avg_wave_period_s",
+        "rating",
+    ]
+    for column in numeric_columns:
+        chart_data[column] = pd.to_numeric(chart_data[column], errors="coerce")
+
+    chart_data = chart_data.dropna(subset=["avg_wave_height_m", "rating"])
+    chart_data["avg_wave_period_s"] = chart_data["avg_wave_period_s"].fillna(1)
+    return chart_data
 
 
 def _spot_rating_chart(performance: pd.DataFrame) -> Figure:
