@@ -8,6 +8,7 @@ import streamlit as st
 from app.dashboard.data import (
     insert_session,
     read_daily_conditions,
+    read_forecast_lineage,
     read_forecast_quality,
     read_pipeline_runs,
     read_sessions,
@@ -64,6 +65,7 @@ def render_session_log() -> None:
 def render_forecast_analysis() -> None:
     st.subheader("Forecast Conditions")
     conditions = read_daily_conditions()
+    lineage = read_forecast_lineage()
     if conditions.empty:
         st.info("Run the Open-Meteo ingestion pipeline and dbt build first.")
         return
@@ -80,14 +82,24 @@ def render_forecast_analysis() -> None:
     )
     filtered = _filter_spots(conditions, selected_spots)
 
-    columns = st.columns(3)
+    selected_lineage = _filter_spots(lineage, selected_spots)
+
+    columns = st.columns(4)
     columns[0].metric("Forecast Days", filtered["forecast_date"].nunique())
+    columns[1].metric("Daily Condition Rows", len(filtered))
+    raw_rows = _sum_columns(selected_lineage, ["raw_marine_rows", "raw_weather_rows"])
+    columns[2].metric("Raw Forecast Rows", raw_rows)
     avg_wave_height = format_number(filtered["avg_wave_height_m"].mean())
     avg_wind_speed = format_number(filtered["avg_wind_speed_kmh"].mean())
-    columns[1].metric("Avg Wave Height (m)", avg_wave_height)
-    columns[2].metric("Avg Wind Speed (km/h)", avg_wind_speed)
+    columns[3].metric("Avg Wave / Wind", f"{avg_wave_height} m / {avg_wind_speed} km/h")
 
     _render_wave_forecast_chart(filtered)
+
+    st.subheader("Forecast Warehouse Lineage")
+    st.dataframe(selected_lineage, use_container_width=True, hide_index=True)
+
+    st.subheader("Daily Condition Mart")
+    st.dataframe(filtered, use_container_width=True, hide_index=True)
 
     st.subheader("Modeled Surfable Days")
     surfable = filtered[filtered["modeled_surfable_day"] == 1]
@@ -198,6 +210,12 @@ def _filter_spots(data: pd.DataFrame, selected_spots: list[str]) -> pd.DataFrame
     if not selected_spots:
         return data
     return data[data["spot_name"].isin(selected_spots)]
+
+
+def _sum_columns(data: pd.DataFrame, columns: list[str]) -> int:
+    if data.empty:
+        return 0
+    return int(data[columns].sum().sum())
 
 
 def _chartable_quality_rows(quality: pd.DataFrame) -> pd.DataFrame:

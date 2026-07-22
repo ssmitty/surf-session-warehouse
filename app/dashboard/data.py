@@ -119,6 +119,51 @@ def read_daily_conditions() -> pd.DataFrame:
     )
 
 
+def read_forecast_lineage() -> pd.DataFrame:
+    return read_query(
+        """
+        WITH marine AS (
+            SELECT
+                spot_id,
+                COUNT(*) AS raw_marine_rows
+            FROM raw_marine_forecasts
+            GROUP BY spot_id
+        ),
+        weather AS (
+            SELECT
+                spot_id,
+                COUNT(*) AS raw_weather_rows
+            FROM raw_weather_forecasts
+            GROUP BY spot_id
+        ),
+        daily_conditions AS (
+            SELECT
+                spot_id,
+                COUNT(*) AS daily_condition_rows,
+                MIN(forecast_date) AS first_forecast_date,
+                MAX(forecast_date) AS latest_forecast_date
+            FROM analytics.fct_daily_spot_conditions
+            GROUP BY spot_id
+        )
+        SELECT
+            spots.spot_name,
+            COALESCE(marine.raw_marine_rows, 0) AS raw_marine_rows,
+            COALESCE(weather.raw_weather_rows, 0) AS raw_weather_rows,
+            COALESCE(daily_conditions.daily_condition_rows, 0) AS daily_condition_rows,
+            daily_conditions.first_forecast_date,
+            daily_conditions.latest_forecast_date
+        FROM surf_spots spots
+        LEFT JOIN marine
+            ON spots.spot_id = marine.spot_id
+        LEFT JOIN weather
+            ON spots.spot_id = weather.spot_id
+        LEFT JOIN daily_conditions
+            ON spots.spot_id = daily_conditions.spot_id
+        ORDER BY spots.spot_name
+        """
+    )
+
+
 def read_pipeline_runs() -> pd.DataFrame:
     return read_query(
         """
