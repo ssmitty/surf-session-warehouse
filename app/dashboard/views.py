@@ -112,6 +112,7 @@ def render_forecast_analysis() -> None:
 def render_quality_analysis() -> None:
     st.subheader("Forecast vs Session Quality")
     quality = read_forecast_quality()
+    conditions = read_daily_conditions()
     if quality.empty:
         st.info("Log sessions and run dbt before reviewing forecast quality.")
         return
@@ -121,22 +122,34 @@ def render_quality_analysis() -> None:
         direction_bucket
     )
 
-    columns = st.columns(3)
+    chart_data = _chartable_quality_rows(quality)
+
+    columns = st.columns(4)
     high_quality_rate = quality["high_quality_session"].mean() * 100
-    matched_surfable = quality["modeled_surfable_day"].sum()
-    columns[0].metric("Matched Sessions", len(quality))
+    matched_surfable = _numeric_sum(quality["modeled_surfable_day"])
+    columns[0].metric("Analyzed Sessions", len(quality))
     columns[1].metric("High Quality Rate", f"{high_quality_rate:.0f}%")
-    columns[2].metric("Modeled Surfable Matches", int(matched_surfable))
+    columns[2].metric("Forecast-Matched Sessions", len(chart_data))
+    columns[3].metric("Modeled Surfable Matches", matched_surfable)
+
+    if chart_data.empty:
+        st.info(_forecast_gap_message(quality, conditions))
 
     left, right = st.columns([1, 1])
     with left:
-        chart_data = _chartable_quality_rows(quality)
         if chart_data.empty:
-            st.info("No sessions have matched forecast metrics to chart yet.")
+            st.subheader("Forecast Quality Window")
+            _render_forecast_quality_chart(conditions)
         else:
+            st.subheader("Matched Session Quality")
             _render_quality_scatter(chart_data)
     with right:
-        st.dataframe(quality, use_container_width=True, hide_index=True)
+        st.subheader("Session Match Status")
+        st.dataframe(
+            _quality_status_rows(quality),
+            use_container_width=True,
+            hide_index=True,
+        )
 
 
 def render_pipeline_health() -> None:
@@ -218,6 +231,10 @@ def _sum_columns(data: pd.DataFrame, columns: list[str]) -> int:
     return int(data[columns].sum().sum())
 
 
+def _numeric_sum(series: pd.Series) -> int:
+    return int(pd.to_numeric(series, errors="coerce").fillna(0).sum())
+
+
 def _chartable_quality_rows(quality: pd.DataFrame) -> pd.DataFrame:
     chart_data = quality.copy()
     numeric_columns = [
@@ -231,6 +248,42 @@ def _chartable_quality_rows(quality: pd.DataFrame) -> pd.DataFrame:
     chart_data = chart_data.dropna(subset=["avg_wave_height_m", "rating"])
     chart_data["avg_wave_period_s"] = chart_data["avg_wave_period_s"].fillna(1)
     return chart_data
+
+
+def _forecast_gap_message(quality: pd.DataFrame, conditions: pd.DataFrame) -> str:
+    if conditions.empty:
+        return "No forecast conditions are available yet. Run ingestion and dbt to compare sessions against modeled conditions."
+
+    session_start = quality["session_date"].min()
+    session_end = quality["session_date"].max()
+    forecast_start = conditions["forecast_date"].min()
+    forecast_end = conditions["forecast_date"].max()
+    return (
+        "No logged sessions share a date with the current forecast mart. "
+        f"Your sessions run from {session_start} to {session_end}, while the "
+        f"forecast window runs from {forecast_start} to {forecast_end}."
+    )
+
+
+def _quality_status_rows(quality: pd.DataFrame) -> pd.DataFrame:
+    status = quality.copy()
+    has_forecast = status["avg_wave_height_m"].notna()
+    status["forecast_match_status"] = "No same-day forecast"
+    status.loc[has_forecast, "forecast_match_status"] = "Matched"
+    return status[
+        [
+            "spot_name",
+            "region",
+            "session_date",
+            "rating",
+            "actual_wave_quality",
+            "forecast_match_status",
+            "avg_wave_height_m",
+            "avg_wave_period_s",
+            "avg_wind_speed_kmh",
+            "modeled_surfable_day",
+        ]
+    ]
 
 
 def _render_spot_rating_chart(performance: pd.DataFrame) -> None:
@@ -259,6 +312,22 @@ def _render_session_timeline_chart(sessions: pd.DataFrame) -> None:
 
 
 def _render_wave_forecast_chart(conditions: pd.DataFrame) -> None:
+    if conditions.empty:
+        st.info("No forecast condition rows are available yet.")
+        return
+    chart_data = conditions.copy()
+    chart_data["forecast_date"] = pd.to_datetime(chart_data["forecast_date"])
+    st.line_chart(
+        chart_data,
+        x="forecast_date",
+        y="avg_wave_height_m",
+        color="spot_name",
+        x_label="Forecast Date",
+        y_label="Average Wave Height (m)",
+    )
+
+
+def _render_forecast_quality_chart(conditions: pd.DataFrame) -> None:
     if conditions.empty:
         st.info("No forecast condition rows are available yet.")
         return
