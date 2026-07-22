@@ -84,7 +84,22 @@ dbt build --profiles-dir .
 6. Run the dashboard:
 
 ```bash
-streamlit run app/streamlit_app.py
+scripts/start_dashboard.sh
+```
+
+Stop the dashboard:
+
+```bash
+scripts/stop_dashboard.sh
+```
+
+The start script runs Streamlit in the background, writes the process ID to
+`logs/streamlit.pid`, and writes server output to `logs/streamlit.log`.
+
+If you need to run the app with a specific Python runtime:
+
+```bash
+DASHBOARD_PYTHON=/path/to/python scripts/start_dashboard.sh
 ```
 
 ## Resume Bullet
