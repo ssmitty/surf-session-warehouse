@@ -23,6 +23,8 @@ def render_overview() -> None:
     performance = read_spot_performance()
     conditions = read_daily_conditions()
 
+    _render_project_summary()
+
     total_sessions = len(sessions)
     avg_rating = sessions["rating"].mean() if total_sessions else None
     surfable_days = _count_surfable_days(conditions)
@@ -46,11 +48,15 @@ def render_overview() -> None:
         st.subheader("Session Timeline")
         _render_session_timeline_chart(sessions)
 
-    st.subheader("Warehouse Mart Preview")
+    st.subheader("Spot Performance Mart")
     st.dataframe(performance, use_container_width=True, hide_index=True)
 
 
 def render_session_log() -> None:
+    st.caption(
+        "Use this tab to log personal surf sessions. These rows feed the dbt "
+        "session fact table and the spot performance mart."
+    )
     st.subheader("Add a Surf Session")
     spots = read_spots()
     if spots.empty:
@@ -64,6 +70,11 @@ def render_session_log() -> None:
 
 def render_forecast_analysis() -> None:
     st.subheader("Forecast Conditions")
+    st.caption(
+        "This tab shows Open-Meteo forecast data after it has been loaded into "
+        "PostgreSQL and rolled up by dbt from hourly raw rows into daily spot "
+        "condition rows."
+    )
     conditions = read_daily_conditions()
     lineage = read_forecast_lineage()
     if conditions.empty:
@@ -111,6 +122,10 @@ def render_forecast_analysis() -> None:
 
 def render_quality_analysis() -> None:
     st.subheader("Forecast vs Session Quality")
+    st.caption(
+        "This tab compares logged surf sessions with same-day modeled forecast "
+        "conditions when the session dates overlap the current forecast window."
+    )
     quality = read_forecast_quality()
     conditions = read_daily_conditions()
     if quality.empty:
@@ -154,6 +169,10 @@ def render_quality_analysis() -> None:
 
 def render_pipeline_health() -> None:
     st.subheader("Pipeline Health")
+    st.caption(
+        "This tab tracks ingestion runs, row counts, statuses, and freshness for "
+        "the forecast pipeline."
+    )
     runs = read_pipeline_runs()
     if runs.empty:
         st.info("No pipeline runs recorded yet.")
@@ -205,6 +224,22 @@ def _render_session_form(spots: pd.DataFrame) -> None:
         )
         st.cache_data.clear()
         st.success("Session saved. Run dbt build to refresh analytics marts.")
+
+
+def _render_project_summary() -> None:
+    st.subheader("What This App Does")
+    st.markdown(
+        """
+        Surf Session Warehouse is a data engineering demo that turns surf
+        forecasts and personal session logs into analytics-ready tables.
+
+        1. Ingest hourly marine and weather forecasts from Open-Meteo.
+        2. Store raw forecast rows and surf sessions in PostgreSQL.
+        3. Use dbt to model daily spot conditions, session facts, and analytics marts.
+        4. Use Streamlit to inspect spot performance, forecast conditions, pipeline health,
+           and whether sessions line up with modeled surfable days.
+        """
+    )
 
 
 def _best_spot_name(performance: pd.DataFrame) -> str:
