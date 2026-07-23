@@ -102,6 +102,21 @@ If you need to run the app with a specific Python runtime:
 DASHBOARD_PYTHON=/path/to/python scripts/start_dashboard.sh
 ```
 
+To keep the dashboard running as a local macOS service with auto-restart:
+
+```bash
+DASHBOARD_PYTHON=/path/to/python scripts/install_dashboard_service.sh
+```
+
+Remove the local service:
+
+```bash
+scripts/uninstall_dashboard_service.sh
+```
+
+The service writes logs to `logs/streamlit-launchd.log` and
+`logs/streamlit-launchd.err.log`.
+
 ## Resume Bullet
 
 Built an end-to-end surf analytics warehouse using PostgreSQL, dbt, Python, and scheduled pipelines to model forecast, wind, wave, and session data for spot-level performance analysis.
