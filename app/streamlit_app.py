@@ -20,7 +20,13 @@ from pipelines.db import ensure_schema
 
 st.set_page_config(page_title="Surf Session Warehouse", layout="wide")
 
-ensure_schema()
+try:
+    ensure_schema()
+except Exception:
+    st.info(
+        "Demo mode is active because PostgreSQL is not connected. "
+        "The deployed app uses sample data that mirrors the warehouse outputs."
+    )
 
 st.title("Surf Session Warehouse")
 st.caption(
