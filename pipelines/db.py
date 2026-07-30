@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-import psycopg
 from dotenv import load_dotenv
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
@@ -27,7 +26,9 @@ def sqlalchemy_database_url() -> str:
     return database_url().replace("postgresql://", "postgresql+psycopg://", 1)
 
 
-def connect() -> psycopg.Connection:
+def connect():
+    import psycopg
+
     return psycopg.connect(database_url())
 
 
