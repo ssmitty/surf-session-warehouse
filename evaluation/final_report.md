@@ -28,12 +28,22 @@ Generated from `evaluation/results.json` on 2026-08-04.
   - Minimum: 0.0352 seconds
   - Maximum: 0.0765 seconds
   - Standard deviation: 0.0182 seconds
+- NOAA/NDBC agreement evaluation matched 159 observation/model rows across 3 sample surf spots.
+- NOAA/NDBC agreement evaluation matched 53 rows for each sample spot: Strathmere, Ocean City, and Indian River Inlet.
+- Open-Meteo modeled wave-height mean absolute error versus NOAA/NDBC observations was 0.9921 m across 159 matched rows.
+- Open-Meteo modeled wave-period mean absolute error versus NOAA/NDBC observations was 1.6060 s across 159 matched rows.
+- Wave-only surfable agreement was 77.36% across 159 matched rows, using the rule: wave height 0.6-2.0 m and wave period at least 7 s.
 
 ## Methodology
 
 The evaluation script uses only repository files, committed sample CSVs, dbt SQL/YAML files, and existing dbt run artifacts unless live services are available. It writes all measurements to `evaluation/results.json`.
 
 The script checks Docker and PostgreSQL availability before attempting database-backed metrics. If a live dependency is unavailable or times out, the metric is marked unavailable rather than estimated.
+
+The NOAA/NDBC agreement script fetches recent buoy observations and Open-Meteo
+modeled hourly marine/weather fields for each sample spot. It matches NOAA
+observations to the nearest Open-Meteo hourly timestamp and computes errors only
+when both values exist.
 
 ## Reproduction Commands
 
@@ -60,17 +70,26 @@ cd warehouse
 dbt build --profiles-dir .
 ```
 
+Run NOAA/NDBC agreement evaluation:
+
+```bash
+python3 evaluation/noaa_forecast_agreement.py
+```
+
 ## Caveats
 
 - Docker was not available during this run. The Docker check returned: `Cannot connect to the Docker daemon at unix:///Users/sean/.orbstack/run/docker.sock. Is the docker daemon running?`
 - The current `.venv` timed out while importing or checking `psycopg`, so live PostgreSQL metrics, ingestion runtime, dashboard query runtime, duplicate rates in raw forecast tables, and pipeline run success rate were not measured in this run.
 - The dbt build timing and row counts come from the existing dbt artifact generated on 2026-07-21, not from a fresh live database run on 2026-08-04.
 - Total raw records ingested was not measured in this run because live PostgreSQL metrics were unavailable.
-- Forecast accuracy was not measured. The repo does not include independent observed surf conditions or a same-day labeled forecast comparison sufficient to claim weather or surf-quality accuracy.
+- Forecast accuracy against logged surf-session ratings was not measured. The repo does not include independent human surf-quality labels at the same timestamp granularity.
+- NOAA/NDBC agreement metrics compare offshore buoy observations with Open-Meteo modeled fields, so they are evidence for model/observation agreement, not exact beach-break surf quality.
+- Wind-speed and wind-direction agreement were not measured in the NOAA run because the selected matched wave station rows did not include usable wind observations.
 - The sample dataset is intentionally small: 3 spots and 4 sessions. It supports validation of the warehouse shape, not production traffic claims.
 
 ## Recommended Resume Bullets
 
 - Modeled surf forecast and session data across 3 sample surf spots using Python, PostgreSQL, and dbt, producing 21 daily spot-condition rows, 4 session fact rows, and 3 spot-performance rows in the recorded warehouse build.
 - Built an 8-model dbt warehouse with 4 staging models and 4 mart/fact models, resulting in 14 passing dbt data-quality checks and a 100.0% test pass rate in the recorded dbt build artifact.
+- Evaluated Open-Meteo modeled surf conditions against 159 NOAA/NDBC buoy observations across 3 sample surf spots, measuring 0.99 m wave-height MAE, 1.61 s wave-period MAE, and 77.36% wave-only surfable agreement.
 - Validated committed surf session seed data with 0 duplicate natural-key rows and 0.0% null rates across required spot and session fields by adding a repeatable Python evaluation harness with machine-readable JSON results.

@@ -1,0 +1,95 @@
+{
+  "generated_at": "2026-08-04T02:39:55.369141+00:00",
+  "limitations": [
+    "NDBC stations are offshore observation points and may not exactly represent beach-break conditions at each sample spot.",
+    "Open-Meteo past-day values from the forecast endpoints are modeled hourly fields, not independent observed ground truth.",
+    "Metrics are only reported for rows where NOAA observations and Open-Meteo modeled timestamps could be matched.",
+    "Wave-quality accuracy against human surf-session labels is not measured by this script."
+  ],
+  "matched_records": 159,
+  "matched_records_by_spot": {
+    "indian-river-de": 53,
+    "ocean-city-nj": 53,
+    "strathmere-nj": 53
+  },
+  "matches_csv": "evaluation/noaa_forecast_agreement_matches.csv",
+  "matching_rule": "NDBC observation matched to nearest Open-Meteo hourly timestamp for the same sample surf spot.",
+  "sources": {
+    "ndbc_realtime": "https://www.ndbc.noaa.gov/data/realtime2/{station_id}.txt",
+    "open_meteo_marine": "https://marine-api.open-meteo.com/v1/marine",
+    "open_meteo_weather": "https://api.open-meteo.com/v1/forecast"
+  },
+  "station_candidates": {
+    "indian-river-de": [
+      "44009",
+      "44091",
+      "44065"
+    ],
+    "ocean-city-nj": [
+      "44091",
+      "44065",
+      "44025"
+    ],
+    "strathmere-nj": [
+      "44091",
+      "44065",
+      "44025"
+    ]
+  },
+  "station_status": {
+    "indian-river-de:44009": {
+      "rows": 6450,
+      "rows_with_wave_height": 0
+    },
+    "indian-river-de:44091": {
+      "rows": 2132,
+      "rows_with_wave_height": 2131
+    },
+    "ocean-city-nj:44091": {
+      "rows": 2132,
+      "rows_with_wave_height": 2131
+    },
+    "strathmere-nj:44091": {
+      "rows": 2132,
+      "rows_with_wave_height": 2131
+    }
+  },
+  "wave_height_m": {
+    "matched_records": 159,
+    "max_absolute_error": 2.2199999999999998,
+    "mean_absolute_error": 0.992075471698113,
+    "median_absolute_error": 1.04,
+    "min_absolute_error": 0.020000000000000018,
+    "rmse": 1.134494041218264
+  },
+  "wave_period_s": {
+    "matched_records": 159,
+    "max_absolute_error": 3.4000000000000004,
+    "mean_absolute_error": 1.6059748427672955,
+    "median_absolute_error": 1.5999999999999996,
+    "min_absolute_error": 0.0,
+    "rmse": 1.925184790607754
+  },
+  "wave_surfable_agreement": {
+    "agreement_rate": 0.7735849056603774,
+    "definition": "Wave-only surfable is true when wave height is 0.6-2.0 m and wave period is at least 7 s.",
+    "matched_records": 159,
+    "matches": 123
+  },
+  "wind_direction_deg": {
+    "matched_records": 0,
+    "max_absolute_error": null,
+    "mean_absolute_error": null,
+    "median_absolute_error": null,
+    "min_absolute_error": null,
+    "rmse": null
+  },
+  "wind_speed_kmh": {
+    "matched_records": 0,
+    "max_absolute_error": null,
+    "mean_absolute_error": null,
+    "median_absolute_error": null,
+    "min_absolute_error": null,
+    "rmse": null
+  }
+}

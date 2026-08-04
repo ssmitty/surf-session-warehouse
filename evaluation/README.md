@@ -42,6 +42,19 @@ Run the dashboard:
 scripts/start_dashboard.sh
 ```
 
+Run NOAA/NDBC observation agreement against Open-Meteo modeled conditions:
+
+```bash
+python3 evaluation/noaa_forecast_agreement.py
+```
+
+This writes:
+
+```bash
+evaluation/noaa_forecast_agreement_results.json
+evaluation/noaa_forecast_agreement_matches.csv
+```
+
 ## Metrics Collected
 
 - Project classification from repository contents.
@@ -57,6 +70,8 @@ scripts/start_dashboard.sh
 - Optional live database row counts, duplicate checks, pipeline run status, and
   dashboard query runtimes when the database is reachable.
 - Optional live dbt build runtime over repeated trials.
+- Optional NOAA/NDBC observation agreement metrics against Open-Meteo modeled
+  wave, period, and wind fields.
 
 ## Metric Definitions
 
@@ -71,6 +86,12 @@ scripts/start_dashboard.sh
 - **Forecast/session agreement**: only valid when logged sessions overlap
   modeled forecast dates. No weather or surf-quality accuracy is claimed unless
   such overlap and a defensible comparison exist.
+- **NOAA/Open-Meteo wave-height MAE**: average absolute difference between NDBC
+  observed wave height and nearest-hour Open-Meteo modeled wave height.
+- **Wave-only surfable agreement**: exact agreement on a binary label where wave
+  height is 0.6-2.0 m and wave period is at least 7 s. This is not full surf
+  quality because it excludes beach-specific shape, tide, crowd, and human
+  session ratings.
 
 ## Limitations
 
@@ -83,6 +104,8 @@ scripts/start_dashboard.sh
   database and working Python/dbt dependencies.
 - Open-Meteo data changes over time, so live row values and forecast windows may
   differ by run date.
+- NDBC buoy stations are offshore observation points and may not exactly
+  represent beach-break conditions at the sample surf spots.
 - The script records unavailable live metrics explicitly instead of estimating
   them.
 
