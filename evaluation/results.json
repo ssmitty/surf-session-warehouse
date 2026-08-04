@@ -1,0 +1,288 @@
+{
+  "commands": {
+    "evaluation": "python3 evaluation/evaluate_surf_session_warehouse.py --trials 5",
+    "optional_live_dbt": "python3 evaluation/evaluate_surf_session_warehouse.py --trials 5 --run-dbt-build"
+  },
+  "compileall_benchmark": {
+    "description": "Python syntax compilation for app, pipelines, and evaluation code.",
+    "failed_trials": 0,
+    "runtime_seconds": {
+      "max": 0.07653862499864772,
+      "mean": 0.044020500197075305,
+      "median": 0.03604045900283381,
+      "min": 0.0352170410042163,
+      "stddev": 0.018183092205374164,
+      "trials": 5
+    },
+    "successful_trials": 5,
+    "trials": [
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.13/bin/python3.13",
+          "-m",
+          "compileall",
+          "-q",
+          "app",
+          "pipelines",
+          "evaluation"
+        ],
+        "cwd": "/Users/sean/Documents/SurfProject",
+        "returncode": 0,
+        "runtime_seconds": 0.07653862499864772,
+        "stderr_tail": "",
+        "stdout_tail": "",
+        "timed_out": false,
+        "timeout_seconds": 30
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.13/bin/python3.13",
+          "-m",
+          "compileall",
+          "-q",
+          "app",
+          "pipelines",
+          "evaluation"
+        ],
+        "cwd": "/Users/sean/Documents/SurfProject",
+        "returncode": 0,
+        "runtime_seconds": 0.03637654200429097,
+        "stderr_tail": "",
+        "stdout_tail": "",
+        "timed_out": false,
+        "timeout_seconds": 30
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.13/bin/python3.13",
+          "-m",
+          "compileall",
+          "-q",
+          "app",
+          "pipelines",
+          "evaluation"
+        ],
+        "cwd": "/Users/sean/Documents/SurfProject",
+        "returncode": 0,
+        "runtime_seconds": 0.03592983397538774,
+        "stderr_tail": "",
+        "stdout_tail": "",
+        "timed_out": false,
+        "timeout_seconds": 30
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.13/bin/python3.13",
+          "-m",
+          "compileall",
+          "-q",
+          "app",
+          "pipelines",
+          "evaluation"
+        ],
+        "cwd": "/Users/sean/Documents/SurfProject",
+        "returncode": 0,
+        "runtime_seconds": 0.03604045900283381,
+        "stderr_tail": "",
+        "stdout_tail": "",
+        "timed_out": false,
+        "timeout_seconds": 30
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.13/bin/python3.13",
+          "-m",
+          "compileall",
+          "-q",
+          "app",
+          "pipelines",
+          "evaluation"
+        ],
+        "cwd": "/Users/sean/Documents/SurfProject",
+        "returncode": 0,
+        "runtime_seconds": 0.0352170410042163,
+        "stderr_tail": "",
+        "stdout_tail": "",
+        "timed_out": false,
+        "timeout_seconds": 30
+      }
+    ]
+  },
+  "database": {
+    "available": false,
+    "check": {
+      "command": [
+        "/Users/sean/Documents/SurfProject/.venv/bin/python",
+        "-c",
+        "\nimport json\nimport os\nimport time\n\nstarted = time.perf_counter()\ntry:\n    import psycopg\n    url = os.getenv(\"DATABASE_URL\") or \"postgresql://surf:surf@localhost:5432/surf_warehouse?connect_timeout=3\"\n    with psycopg.connect(url) as conn, conn.cursor() as cur:\n        cur.execute(\"select current_database(), current_user\")\n        row = cur.fetchone()\n    print(json.dumps({\"available\": True, \"row\": row, \"runtime_seconds\": time.perf_counter() - started}))\nexcept Exception as exc:\n    print(json.dumps({\"available\": False, \"error_type\": type(exc).__name__, \"error\": str(exc), \"runtime_seconds\": time.perf_counter() - started}))\n"
+      ],
+      "cwd": "/Users/sean/Documents/SurfProject",
+      "returncode": null,
+      "runtime_seconds": 12.010538250004174,
+      "stderr_tail": "",
+      "stdout_tail": "",
+      "timed_out": true,
+      "timeout_seconds": 12
+    },
+    "parsed": null
+  },
+  "database_metrics": {
+    "available": false,
+    "reason": "Database check did not succeed; live database metrics were not run."
+  },
+  "dbt_artifact": {
+    "available": true,
+    "dbt_version": "1.8.9",
+    "elapsed_time_seconds": 68.93065595626831,
+    "generated_at": "2026-07-21T17:13:04.792186Z",
+    "invocation_command": "dbt build --profiles-dir .",
+    "model_count": 8,
+    "model_rows_affected": {
+      "fct_daily_spot_conditions": 21,
+      "fct_surf_sessions": 4,
+      "mart_forecast_vs_session_quality": 4,
+      "mart_spot_performance": 3
+    },
+    "resource_execution_time_seconds": {
+      "max": 20.46891689300537,
+      "mean": 8.747449040412903,
+      "median": 7.715897917747498,
+      "min": 2.205902099609375,
+      "stddev": 5.280570348478493,
+      "trials": 22
+    },
+    "resource_status_counts": {
+      "pass": 14,
+      "success": 8
+    },
+    "successful_model_count": 8,
+    "test_count": 14,
+    "test_pass_count": 14,
+    "test_pass_rate": 1.0
+  },
+  "docker": {
+    "available": false,
+    "check": {
+      "command": [
+        "docker",
+        "compose",
+        "ps"
+      ],
+      "cwd": "/Users/sean/Documents/SurfProject",
+      "returncode": 1,
+      "runtime_seconds": 0.31592629197984934,
+      "stderr_tail": "Cannot connect to the Docker daemon at unix:///Users/sean/.orbstack/run/docker.sock. Is the docker daemon running?\n",
+      "stdout_tail": "",
+      "timed_out": false,
+      "timeout_seconds": 10
+    }
+  },
+  "generated_at": "2026-08-04T02:27:07.702179+00:00",
+  "live_dbt_build": {
+    "available": false,
+    "reason": "Not requested. Use --run-dbt-build when PostgreSQL and dbt are available."
+  },
+  "repo": "/Users/sean/Documents/SurfProject",
+  "repository": {
+    "dbt_static": {
+      "declared_data_quality_check_count": 14,
+      "mart_model_count": 4,
+      "model_files": [
+        "warehouse/models/marts/fct_daily_spot_conditions.sql",
+        "warehouse/models/marts/fct_surf_sessions.sql",
+        "warehouse/models/marts/mart_forecast_vs_session_quality.sql",
+        "warehouse/models/marts/mart_spot_performance.sql",
+        "warehouse/models/staging/stg_marine_forecasts.sql",
+        "warehouse/models/staging/stg_sessions.sql",
+        "warehouse/models/staging/stg_spots.sql",
+        "warehouse/models/staging/stg_weather_forecasts.sql"
+      ],
+      "staging_model_count": 4,
+      "transformation_model_count": 8
+    },
+    "project_type": "surf_session_warehouse",
+    "repository_files": 41,
+    "sample_data": {
+      "surf_sessions": {
+        "duplicate_rate": {
+          "duplicate_rate": 0.0,
+          "duplicate_rows": 0,
+          "key_fields": [
+            "spot_slug",
+            "session_date",
+            "start_time",
+            "notes"
+          ],
+          "total_rows": 4
+        },
+        "rating_distribution": {
+          "2": 1,
+          "3": 1,
+          "4": 1,
+          "5": 1
+        },
+        "required_field_null_rates": {
+          "duration_minutes": {
+            "null_count": 0,
+            "null_rate": 0.0,
+            "total_rows": 4
+          },
+          "rating": {
+            "null_count": 0,
+            "null_rate": 0.0,
+            "total_rows": 4
+          },
+          "session_date": {
+            "null_count": 0,
+            "null_rate": 0.0,
+            "total_rows": 4
+          },
+          "spot_slug": {
+            "null_count": 0,
+            "null_rate": 0.0,
+            "total_rows": 4
+          }
+        },
+        "rows": 4
+      },
+      "surf_spots": {
+        "duplicate_rate": {
+          "duplicate_rate": 0.0,
+          "duplicate_rows": 0,
+          "key_fields": [
+            "spot_slug"
+          ],
+          "total_rows": 3
+        },
+        "required_field_null_rates": {
+          "latitude": {
+            "null_count": 0,
+            "null_rate": 0.0,
+            "total_rows": 3
+          },
+          "longitude": {
+            "null_count": 0,
+            "null_rate": 0.0,
+            "total_rows": 3
+          },
+          "region": {
+            "null_count": 0,
+            "null_rate": 0.0,
+            "total_rows": 3
+          },
+          "spot_name": {
+            "null_count": 0,
+            "null_rate": 0.0,
+            "total_rows": 3
+          },
+          "spot_slug": {
+            "null_count": 0,
+            "null_rate": 0.0,
+            "total_rows": 3
+          }
+        },
+        "rows": 3
+      }
+    }
+  }
+}
